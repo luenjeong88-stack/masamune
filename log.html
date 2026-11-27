@@ -83,6 +83,12 @@ h1{font-family:"Zen Antique","Shippori Mincho B1","Shippori Mincho","Hiragino Mi
 .wkpic{margin:0 0 14px;border:1px solid var(--sky2);border-radius:12px;overflow:hidden;box-shadow:0 0 14px rgba(255,255,255,.9),0 2px 10px rgba(125,189,236,.18);line-height:0}
 .wkpic img{width:100%;height:auto;display:block}
 .wikibox .nw-doc-title{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif!important}
+.wikibox .wk-in .nw-doc .nw-fnwrap .nw-fnpop{display:none!important;position:absolute!important;top:100%!important;bottom:auto!important;width:max-content!important;max-width:min(300px,calc(100vw - 80px))!important;margin:7px 0 0!important;z-index:60!important;box-shadow:0 6px 20px rgba(16,20,24,.16)!important}
+.wikibox .wk-in .nw-doc .nw-fnwrap.fn-open .nw-fnpop{display:block!important}
+.wikibox .wk-in .nw-doc .nw-fnwrap .nw-fnpop{pointer-events:none!important}
+.wikibox .wk-in .nw-doc .nw-fnwrap .nw-fnpop .nw-fnjump{pointer-events:auto!important}
+@media (hover:hover){.wikibox .wk-in .nw-doc .nw-fnwrap:hover .nw-fnpop{display:block!important}}
+.wikibox .nw-fnwrap>.nw-ref{pointer-events:auto!important}
 .wikibox .nw-content{padding:24px 4% 36px!important}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
@@ -215,6 +221,47 @@ h1{font-family:"Zen Antique","Shippori Mincho B1","Shippori Mincho","Hiragino Mi
   </section>
 </main>
 
+<script>
+// 각주: 누르면 그 자리에서 말풍선이 뜨고, 다른 곳을 누르면 닫혀요 (하단으로 점프하지 않음)
+(function(){
+  var box=document.querySelector('.wikibox');if(!box)return;
+  function place(w){
+    var p=w.querySelector('.nw-fnpop');if(!p)return;
+    var root=box.querySelector('.nw-doc')||box,op=p.offsetParent||root;
+    var oR=op.getBoundingClientRect(),dR=root.getBoundingClientRect(),wR=w.getBoundingClientRect();
+    var pad=8,mw=Math.min(300,dR.width-2*pad);
+    p.style.setProperty('width',mw+'px','important');p.style.setProperty('max-width',mw+'px','important');
+    p.style.setProperty('left','0px','important');p.style.setProperty('right','auto','important');
+    var pw=p.offsetWidth,x=wR.left+wR.width/2-pw/2,lo=dR.left+pad,hi=dR.right-pw-pad;
+    if(hi<lo)hi=lo;if(x<lo)x=lo;if(x>hi)x=hi;
+    p.style.setProperty('left',(x-oR.left)+'px','important');p.style.setProperty('right','auto','important');
+  }
+  function closeAll(except){box.querySelectorAll('.nw-fnwrap.fn-open').forEach(function(n){if(n!==except)n.classList.remove('fn-open')})}
+  // 내장 위치 계산 대신 이 코드가 위치를 잡습니다 (겹쳐서 어긋나던 문제 방지)
+  ['mouseover','focusin','touchstart'].forEach(function(ev){
+    box.addEventListener(ev,function(e){
+      var w=e.target.closest&&e.target.closest('.nw-fnwrap');if(!w)return;
+      e.stopPropagation();
+      if(ev==='mouseover')place(w);
+    },true);
+  });
+  box.addEventListener('click',function(e){
+    var t=e.target,w=t.closest&&t.closest('.nw-fnwrap');
+    if(w&&box.contains(w)){
+      if(t.closest('.nw-fnjump'))return;            // "하단 각주로 이동"은 그대로 점프
+      e.preventDefault();
+      if(t.closest('.nw-fnpop'))return;
+      try{w.blur()}catch(_){}
+      var open=!w.classList.contains('fn-open');
+      closeAll(w);w.classList.toggle('fn-open',open);
+      if(open)place(w);
+      return;
+    }
+    closeAll();
+  });
+  document.addEventListener('click',function(e){if(!box.contains(e.target))closeAll()});
+})();
+</script>
 <a id="__back" href="index.html" aria-label="메인으로 돌아가기" title="MAIN"><svg viewBox="0 0 44 44"><defs><linearGradient id="__bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fd0f8"/><stop offset="1" stop-color="#4a8fe0"/></linearGradient></defs><path d="M20 9 Q20 24 35 24 Q20 24 20 39 Q20 24 5 24 Q20 24 20 9Z" fill="none" stroke="url(#__bg)" stroke-width="1.6" stroke-linejoin="round"/><path d="M36 4.5 Q36 10 41.5 10 Q36 10 36 15.5 Q36 10 30.5 10 Q36 10 36 4.5Z" fill="none" stroke="url(#__bg)" stroke-width="1.3" stroke-linejoin="round"/></svg></a>
 <script>
 // index 안에서 열렸으면 index로 닫히며 돌아가고(노래 유지), 혼자 열렸으면 index.html로 이동해요
