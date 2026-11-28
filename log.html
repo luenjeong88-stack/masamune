@@ -237,6 +237,10 @@ h1{font-family:"Zen Antique","Shippori Mincho B1","Shippori Mincho","Hiragino Mi
     var pw=p.offsetWidth,x=wR.left+wR.width/2-pw/2,lo=dR.left+pad,hi=dR.right-pw-pad;
     if(hi<lo)hi=lo;if(x<lo)x=lo;if(x>hi)x=hi;
     p.style.setProperty('left',(x-oR.left)+'px','important');p.style.setProperty('right','auto','important');
+    // 각주 숫자 바로 아래(공간이 없으면 바로 위)에 붙이기
+    var ph=p.offsetHeight,below=window.innerHeight-wR.bottom,top=wR.bottom-oR.top+4;
+    if(below<ph+12&&wR.top>ph+12)top=wR.top-oR.top-ph-4;
+    p.style.setProperty('top',top+'px','important');p.style.setProperty('margin','0','important');
   }
   function closeAll(except){box.querySelectorAll('.nw-fnwrap.fn-open').forEach(function(n){if(n!==except)n.classList.remove('fn-open')})}
   // 내장 위치 계산 대신 이 코드가 위치를 잡습니다 (겹쳐서 어긋나던 문제 방지)
